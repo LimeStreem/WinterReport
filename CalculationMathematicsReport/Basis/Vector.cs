@@ -1,31 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CalculationMathematicsReport.Basis
 {
     public struct Vector
     {
-
-        public static Vector Zero(int size)
+        public Vector(params float[] elements) : this()
         {
-            Vector vec=new Vector();
-            vec.Elements=new float[size];
-            return vec;
+            Elements = new float[elements.Length];
+            Array.Copy(elements, Elements, elements.Length);
         }
 
-        public static Vector One(int size)
+        public Vector(IVectorElementBuilder builder) : this()
         {
-            Vector vec=new Vector();
-            vec.Elements=new float[size];
-            for (int i = 0; i < size; i++)
+            Elements = new float[builder.GetSize()];
+            for (var i = 0; i < Size; i++)
             {
-                vec.Elements[i] = 1f;
+                Elements[i] = builder.GetAt(i);
             }
-            return vec;
         }
 
         public float this[int x]
@@ -41,19 +32,22 @@ namespace CalculationMathematicsReport.Basis
             get { return Elements.Length; }
         }
 
-        public Vector(params float[] elements) : this()
+        public static Vector Zero(int size)
         {
-            Elements=new float[elements.Length];
-            Array.Copy(elements,Elements,elements.Length);
+            var vec = new Vector();
+            vec.Elements = new float[size];
+            return vec;
         }
 
-        public Vector(IVectorElementBuilder builder) : this()
+        public static Vector One(int size)
         {
-            Elements=new float[builder.GetSize()];
-            for (int i = 0; i < Size; i++)
+            var vec = new Vector();
+            vec.Elements = new float[size];
+            for (var i = 0; i < size; i++)
             {
-                Elements[i] = builder.GetAt(i);
+                vec.Elements[i] = 1f;
             }
+            return vec;
         }
 
         public float TwoNorm()
@@ -63,7 +57,7 @@ namespace CalculationMathematicsReport.Basis
 
         public float OneNorm()
         {
-            return (float) Elements.Sum();
+            return Elements.Sum();
         }
 
         public float InfNorm()
@@ -78,40 +72,38 @@ namespace CalculationMathematicsReport.Basis
 
         public static Vector operator -(Vector a, Vector b)
         {
-            return new Vector(FloatArrayExtension.ElementSubtract(a.Elements,b.Elements));
+            return new Vector(FloatArrayExtension.ElementSubtract(a.Elements, b.Elements));
         }
 
         public static Vector operator *(float sc, Vector vec)
         {
-            return new Vector(new BasicVectorElementBuilder(vec.Size,(i)=>sc*vec[i]));
+            return new Vector(new BasicVectorElementBuilder(vec.Size, i => sc*vec[i]));
         }
 
         public override string ToString()
         {
-            Vector tmpThis = this;
-            return "(" + LamdaUtility.StringfySum(tmpThis.Size, (i) => (tmpThis[i].ToString() + ",")) + "){Norm:" +
-                   TwoNorm()+"}";
+            var tmpThis = this;
+            return "(" + LamdaUtility.StringfySum(tmpThis.Size, i => (tmpThis[i].ToString() + ",")) + "){Norm:" +
+                   TwoNorm() + "}";
         }
     }
 
     public interface IVectorElementBuilder
     {
         int GetSize();
-
         float GetAt(int i);
     }
 
-    public class BasicVectorElementBuilder:IVectorElementBuilder
+    public class BasicVectorElementBuilder : IVectorElementBuilder
     {
-        public int Size { get; private set; }
-
-        public Func<int,float> Generator { get; private set; }
-
         public BasicVectorElementBuilder(int size, Func<int, float> generator)
         {
             Size = size;
             Generator = generator;
         }
+
+        public int Size { get; private set; }
+        public Func<int, float> Generator { get; private set; }
 
         public int GetSize()
         {

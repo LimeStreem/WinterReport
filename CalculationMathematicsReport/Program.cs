@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using CalculationMathematicsReport.Basis;
 using CalculationMathematicsReport.CalcMath;
 using CalculationMathematicsReport.Compute;
@@ -18,9 +17,18 @@ namespace CalculationMathematicsReport
 
         private static void Main(string[] args)
         {
-            //Experiment1();
-            //Experiment2();
-            Experiment3(16000);
+            switch (int.Parse(args[0]))
+            {
+                case 1:
+                    Experiment1();
+                    break;
+                case 2:
+                    Experiment2();
+                    break;
+                case 3:
+                    Experiment3(int.Parse(args[1]));
+                    break;
+            }
         }
 
         private static void Experiment3(int N)
@@ -33,7 +41,7 @@ namespace CalculationMathematicsReport
                 var mat = new Matrix(new BasicMatrixElementBuilder(N, matrixGen));
                 var eq = mat*Vector.One(N);
                 var x = Vector.Zero(N);
-                Vector[] vecs=new Vector[100];
+                var vecs = new Vector[100];
                 using (var tex = new ReadableVectorTexture(device, Format.R32_Float, N))
                 using (var evec = new EquationVectorTexture(device, eq))
                 using (var matTex = new CoefficientMatrixTexture(device, mat))
@@ -54,12 +62,12 @@ namespace CalculationMathematicsReport
                                 3);
                             device.ImmediateContext.ComputeShader.SetConstantBuffers(
                                 new[] {constants.ArgumentConstantBuffer}, 0, 1);
-                            device.ImmediateContext.Dispatch(1024,1,1);
+                            device.ImmediateContext.Dispatch(1024, 1, 1);
                             x = tex.ToVector();
                             var relativeError = (x - Vector.One(N)).TwoNorm()/Vector.One(N).TwoNorm();
                             st.Stop();
-                            Console.WriteLine("{0}回目の反復:相対誤差{1}計算時間{2}",i,relativeError,st.ElapsedMilliseconds);
-                            result += string.Format("{0},{1},{2}\n",i,relativeError,st.ElapsedMilliseconds);
+                            Console.WriteLine("{0}回目の反復:相対誤差{1}計算時間{2}", i, relativeError, st.ElapsedMilliseconds);
+                            result += string.Format("{0},{1},{2}\n", i, relativeError, st.ElapsedMilliseconds);
                             if (relativeError < Epsilon)
                             {
                                 isOK = true;
@@ -80,13 +88,13 @@ namespace CalculationMathematicsReport
 //                        Console.WriteLine("N={0}のとき、収束せず", N);
 //                        result += string.Format("{0},{1},{2}\n", N, -1, st.ElapsedMilliseconds);
 //                    }
-                        using (var fs = File.OpenWrite("resultG-"+N+".csv"))
-                        using (var wr = new StreamWriter(fs))
-                        {
-                            fs.Seek(0, SeekOrigin.End);
-                            wr.Write(result);
-                            wr.Flush();
-                        }
+                    using (var fs = File.OpenWrite("resultG-" + N + ".csv"))
+                    using (var wr = new StreamWriter(fs))
+                    {
+                        fs.Seek(0, SeekOrigin.End);
+                        wr.Write(result);
+                        wr.Flush();
+                    }
                 }
             }
         }

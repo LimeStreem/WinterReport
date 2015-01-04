@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using SlimDX;
+﻿using SlimDX;
 
 namespace CalculationMathematicsReport.Compute
 {
     /// <summary>
-    /// 1次元データの読みだし
+    ///     1次元データの読みだし
     /// </summary>
     public class VectorTextureDataWrapper
     {
@@ -19,7 +13,6 @@ namespace CalculationMathematicsReport.Compute
         {
             _dbox = dbox;
         }
-
 
         public unsafe float this[int x]
         {
